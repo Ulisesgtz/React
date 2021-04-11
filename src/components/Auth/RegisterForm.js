@@ -3,6 +3,7 @@ import { View, Text } from 'react-native'
 import {TextInput,Button} from "react-native-paper";
 import {useFormik} from "formik";
 import * as Yup from "yup";
+import {registerApi} from "../../api/user"
 import {formStyle} from "../../styles"
 
 export default function RegisterForm(props) {
@@ -10,10 +11,14 @@ export default function RegisterForm(props) {
 
     const formik = useFormik({
         initialValues: initialValues(),
-        validationSchema: Yup.object(validationSchema),
-        onSubmit: (formData) =>{
-            console.log("Registro de usuario Enviado");
-            console.log(formData);
+        validationSchema: Yup.object(validationSchema()),
+        onSubmit: async (formData) =>{
+            try {
+                await registerApi(formData);
+                console.log("OK");
+            } catch (error) {
+                console.log(error);
+            }
         }
     })
 
@@ -77,10 +82,11 @@ function initialValues() {
 }
 
 function validationSchema() {
-    return{
+    return {
         email: Yup.string().email(true).required(true),
         username: Yup.string().required(true),
         password: Yup.string().required(true),
-        repeatPassword: Yup.string().required(true).oneOf([Yup.ref("password")],true),
+        repeatPassword: Yup.string().required(true)
+        .oneOf([Yup.ref("password")],true),
     };
 }
